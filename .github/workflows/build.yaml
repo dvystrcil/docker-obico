@@ -6,7 +6,7 @@ on:
     inputs:
       branch:
         description: 'Obico Branch'
-        default: 'master'
+        default: 'pre-release'
         type: choice
         options:
           - release
