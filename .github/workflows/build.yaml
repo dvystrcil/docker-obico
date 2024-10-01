@@ -53,10 +53,10 @@ jobs:
             type=raw,value=${{ env.OBICO_BRANCH }}
             type=raw,value=sha-${{ steps.short-sha.outputs.SHA }}
             type=raw,value=sha-${{ env.OBICO_REF }}
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
+      # - name: Set up QEMU
+      #   uses: docker/setup-qemu-action@v3
+      #   with:
+      #     platforms: arm64
       - name: Set up Buildx
         uses: docker/setup-buildx-action@v3
       - name: Login to GitHub Container Registry
@@ -71,7 +71,7 @@ jobs:
           context: backend
           pull: true
           push: ${{ github.ref == 'refs/heads/main' }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
@@ -103,10 +103,10 @@ jobs:
             type=raw,value=${{ env.OBICO_BRANCH }}
             type=raw,value=sha-${{ steps.short-sha.outputs.SHA }}
             type=raw,value=sha-${{ env.OBICO_REF }}
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
+      # - name: Set up QEMU
+      #   uses: docker/setup-qemu-action@v3
+      #   with:
+      #     platforms: arm64
       - name: Set up Buildx
         uses: docker/setup-buildx-action@v3
       - name: Login to GitHub Container Registry
@@ -121,7 +121,7 @@ jobs:
           context: ml_api
           pull: true
           push: ${{ github.ref == 'refs/heads/main' }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
