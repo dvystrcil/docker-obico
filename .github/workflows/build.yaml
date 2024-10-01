@@ -14,7 +14,7 @@ on:
           - master
       ref:
         description: 'Obico Commit'
-        default: ''
+        default: 'HEAD'
         required: true      
           
 env:
@@ -47,7 +47,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ghcr.io/gabe565/obico/web
+            ghcr.io/dvystrcil/obico/web
           tags: |
             type=raw,priority=1000,value=latest
             type=raw,value=${{ env.OBICO_BRANCH }}
@@ -97,7 +97,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ghcr.io/gabe565/obico/ml-api
+            ghcr.io/dvystrcil/obico/ml-api
           tags: |
             type=raw,priority=1000,value=latest
             type=raw,value=${{ env.OBICO_BRANCH }}
