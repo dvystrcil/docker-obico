@@ -35,6 +35,9 @@ jobs:
         with:
           repository: ${{ env.OBICO_REPO }}
           ref: ${{ env.OBICO_REF }}
+      - name: Add frontend
+        run: |
+          mv frontend backend/
       - id: short-sha
         name: Get short sha
         run: echo "SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
