@@ -37,6 +37,7 @@ jobs:
       - name: Add frontend
         run: |
           mv frontend backend/
+          echo 'RUN ln -s /app/frontend /frontend' >> backend/Dockerfile
       - id: short-sha
         name: Get short sha
         run: echo "SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
