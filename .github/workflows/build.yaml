@@ -25,8 +25,16 @@ on:
       #   required: true      
           
 env:
-  OBICO_REPO: ${{ inputs.repo }} 
-  OBICO_BRANCH: ${{ inputs.branch }} 
+  # `inputs.*` is populated ONLY for workflow_dispatch. On a push event both
+  # are the empty string, and actions/checkout with repository:'' silently
+  # checks out THIS repo instead of obico-server — so ./obico became a copy
+  # of obico-docker, and `mv frontend backend/` failed on a directory that
+  # was never going to be there.
+  #
+  # Every push run had failed since 2026-07-31 (12 of 12); 4 of 5 dispatch
+  # runs succeeded. The defaults make both paths behave the same.
+  OBICO_REPO: ${{ inputs.repo || 'TheSpaghettiDetective/obico-server' }}
+  OBICO_BRANCH: ${{ inputs.branch || 'release' }}
 
 jobs:
   build-images:
@@ -52,6 +60,26 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ github.token }}
+      # Upstream owns this layout and has never promised it. When it moves,
+      # the old failure was `mv: cannot stat 'frontend'` — which says
+      # nothing about which repo, which ref, or what IS there. This asserts
+      # the shape first and prints the actual tree on failure, so a layout
+      # change is diagnosed in one look instead of a bisect.
+      - name: Verify upstream layout before assembling
+        run: |
+          missing=""
+          for d in frontend backend; do
+            [ -d "obico/$d" ] || missing="$missing $d"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::${OBICO_REPO}@${OBICO_BRANCH} is missing:${missing}"
+            echo "Top level of the checkout was:"
+            ls -1 obico | sed 's/^/  /'
+            echo "If upstream reorganised, update this step and the assembly below."
+            exit 1
+          fi
+          echo "layout ok: obico/frontend and obico/backend present"
+
       - name: Update compose file
         run: |
           cp -r obico/* .
