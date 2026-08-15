@@ -1,7 +1,12 @@
 name: Build
 
 on:
-  push: {}
+  # Only main. This used to be `push: {}` — every branch, every push — so a
+  # work-in-progress branch would build and publish an image. A push here
+  # means OUR packaging changed, which is a legitimate reason to rebuild;
+  # a push to a feature branch is not.
+  push:
+    branches: [main]
   workflow_dispatch: 
     inputs:
       repo:
@@ -18,7 +23,6 @@ on:
         options:
           - release
           - pre-release
-          - master
       # ref:
       #   description: 'Obico Commit'
       #   default: 'HEAD'
@@ -65,6 +69,20 @@ jobs:
       # nothing about which repo, which ref, or what IS there. This asserts
       # the shape first and prints the actual tree on failure, so a layout
       # change is diagnosed in one look instead of a bisect.
+      # Only release and pre-release are buildable. `master` is upstream's
+      # development trunk: it builds, it publishes, and what comes out is
+      # whatever happened to be mid-flight that day — indistinguishable
+      # afterwards from a real release image. It was in the dispatch menu,
+      # one mis-click away.
+      - name: Refuse to build from a non-release ref
+        run: |
+          case "${OBICO_BRANCH}" in
+            release|pre-release) echo "building from ${OBICO_BRANCH}" ;;
+            *)
+              echo "::error::refusing to build from '${OBICO_BRANCH}' — only release or pre-release"
+              exit 1 ;;
+          esac
+
       - name: Verify upstream layout before assembling
         run: |
           missing=""
