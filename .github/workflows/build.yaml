@@ -7,6 +7,11 @@ on:
   # a push to a feature branch is not.
   push:
     branches: [main]
+  # PRs BUILD but do not PUSH (see the bake step). Restricting this workflow
+  # to main alone removed all pre-merge validation: a broken build would
+  # then only surface after merging, which is how this one went unnoticed
+  # for two weeks in the first place.
+  pull_request:
   workflow_dispatch: 
     inputs:
       repo:
@@ -110,7 +115,11 @@ jobs:
         uses: docker/bake-action@v7
         with:
           files: "bake.hcl,docker-compose.yml"
-          push: true
+          # Publish only from main or a deliberate dispatch. A PR proves the
+          # image BUILDS; it has no business publishing one, and an image
+          # from an unmerged branch is indistinguishable afterwards from a
+          # real release.
+          push: ${{ github.event_name != 'pull_request' }}
           source: .
 #        - name: Docker meta
 #         id: meta
